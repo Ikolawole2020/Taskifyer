@@ -1,6 +1,4 @@
 import random
-import traceback
-import requests
 from django.conf import settings
 from rest_framework import serializers
 from .models import User, CustomerProfile, ProviderProfile, PortfolioImage
@@ -19,8 +17,9 @@ class UserSerializer(serializers.ModelSerializer):
             'role',
             'profile_picture',
             'is_verified',
+            'verification_code',
         ]
-        read_only_fields = ['id', 'username', 'email', 'role', 'is_verified']
+        read_only_fields = ['id', 'username', 'email', 'role', 'is_verified', 'verification_code']
 
 
 class CustomerProfileSerializer(serializers.ModelSerializer):
@@ -112,27 +111,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         elif role == User.Role.PROVIDER:
             ProviderProfile.objects.create(user=user)
 
-        # Send the verification email via EmailJS REST API
-        try:
-            url = "https://api.emailjs.com/api/v1.0/email/send"
-            payload = {
-                "service_id": getattr(settings, 'EMAILJS_SERVICE_ID', ''),
-                "template_id": getattr(settings, 'EMAILJS_TEMPLATE_ID', ''),
-                "user_id": getattr(settings, 'EMAILJS_PUBLIC_KEY', ''),
-                "template_params": {
-                    "to_email": user.email,
-                    "to_name": user.username,
-                    "code": code,
-                }
-            }
-            response = requests.post(url, json=payload)
-            if response.status_code != 200:
-                raise Exception(f"EmailJS error: {response.text}")
-        except Exception as e:
-            traceback.print_exc()
-            print(f"EMAILJS ERROR: {repr(e)}")
-            raise serializers.ValidationError(f"Email delivery failed: {str(e)}")
-
         return user
 
 
@@ -176,5 +154,4 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 class PasswordResetConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField(max_length=6)
-    new_password = serializers.CharField(min_length=8, write_only=True)    
-    
+    new_password = serializers.CharField(min_length=8, write_only=True)
