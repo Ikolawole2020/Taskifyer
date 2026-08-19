@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import emailjs from '@emailjs/browser';
 import API from '@/lib/api';
 
 export default function RegisterPage() {
@@ -37,7 +38,24 @@ export default function RegisterPage() {
     setSuccess(false);
 
     try {
-      await API.post('/register/', formData);
+      // 1. Register user on your PythonAnywhere Django backend
+      const res = await API.post('/register/', formData);
+      
+      // 2. Extract verification code sent back from backend serializer
+      const verificationCode = res.data.verification_code;
+
+      // 3. Trigger EmailJS directly from the browser using your keys
+      await emailjs.send(
+        'service_jsx06op',
+        'template_epi7q0f',
+        {
+          to_email: formData.email,
+          to_name: formData.first_name || formData.username,
+          code: verificationCode, // Matches your template variable {{code}}
+        },
+        '7rLQNKYr45GlbZ1ED'
+      );
+
       setSuccess(true);
       setTimeout(() => {
         router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
@@ -51,7 +69,6 @@ export default function RegisterPage() {
         if (typeof data === 'string') {
           message = data;
         } else {
-          // Extract first validation error from Django object response
           const firstKey = Object.keys(data)[0];
           if (firstKey) {
             const val = data[firstKey];
@@ -106,7 +123,7 @@ export default function RegisterPage() {
           {success && (
             <div className="bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-sm px-4 py-3 rounded-xl flex items-center gap-3 animate-in fade-in">
               <span>✅</span>
-              <span className="font-medium">Account created! Redirecting to email verification...</span>
+              <span className="font-medium">Account created & email sent! Redirecting...</span>
             </div>
           )}
 
