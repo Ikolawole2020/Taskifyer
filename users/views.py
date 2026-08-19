@@ -53,6 +53,7 @@ class RegisterView(APIView):
             user = serializer.save()
             return Response({
                 "message": "User registered successfully",
+                "verification_code": user.verification_code,
                 "user": {
                     "id": user.id,
                     "username": user.username,
@@ -261,8 +262,4 @@ class PasswordResetConfirmView(APIView):
             user.save()
 
             return Response({"message": "Password reset successfully! You can now log in with your new password."}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
-    
-    
-    
-    
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
