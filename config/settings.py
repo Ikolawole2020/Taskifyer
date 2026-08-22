@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'services',
     'bookings',
+    'payments',
     'reviews',
     'core',
 ]
@@ -141,3 +142,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAILJS_SERVICE_ID = 'service_jsx06op'
 EMAILJS_TEMPLATE_ID = 'template_epi7q0f'
 EMAILJS_PUBLIC_KEY = '7rLQNKYr45GlbZ1ED'
+
+# Paystack Configuration (NEVER commit real keys — set env vars on PythonAnywhere)
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', 'sk_test_d03179807b843af941ff7016ad35a480764afe0a')
+SITE_URL = os.environ.get('SITE_URL', 'https://taskify.pythonanywhere.com')

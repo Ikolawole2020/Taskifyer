@@ -64,6 +64,14 @@ class ProviderProfile(models.Model):
     id_document_type = models.CharField(max_length=50, blank=True, null=True)  # e.g. NIN, Driver's License, Passport
     id_document = models.FileField(upload_to='verification/', blank=True, null=True)
     verification_note = models.TextField(blank=True, null=True)  # admin feedback on rejection
+
+    # Payout onboarding (Paystack transfer recipient)
+    bank_name = models.CharField(max_length=100, blank=True, null=True)
+    bank_code = models.CharField(max_length=20, blank=True, null=True)
+    account_number_last4 = models.CharField(max_length=4, blank=True, null=True)
+    account_name = models.CharField(max_length=150, blank=True, null=True)
+    recipient_code = models.CharField(max_length=50, blank=True, null=True)
+    payout_ready = models.BooleanField(default=False)
     
     city = models.CharField(max_length=100, default='Lagos')
     address = models.TextField(blank=True, null=True)

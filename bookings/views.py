@@ -77,28 +77,38 @@ class BookingViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
+        """
+        Provider marks the job done. Status becomes AWAITING_CONFIRMATION —
+        the customer confirms (or 48h auto-confirm) before payout is released.
+        """
         booking = self.get_object()
         if request.user.role != 'PROVIDER' or booking.provider.user != request.user:
             return Response({"error": "Not allowed"}, status=status.HTTP_403_FORBIDDEN)
 
-        booking.status = Booking.Status.COMPLETED
+        if booking.status not in [Booking.Status.ACCEPTED, Booking.Status.IN_PROGRESS]:
+            return Response(
+                {"error": f"Cannot complete a booking that is {booking.status.lower()}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        booking.status = Booking.Status.AWAITING_CONFIRMATION
         booking.completed_at = timezone.now()
-        booking.save()
+        booking.save(update_fields=['status', 'completed_at'])
 
-        # Update provider's completed jobs count
-        provider = booking.provider
-        provider.total_jobs_completed += 1
-        provider.save(update_fields=['total_jobs_completed'])
-
-        # Notify the customer
+        # Notify the customer to confirm completion
         Notification.objects.create(
             user=booking.customer,
-            title="Job Completed",
-            message=f"Your booking for '{booking.title or booking.service.title}' has been marked as completed."
+            title="Job Marked Complete",
+            message=(f"The provider marked '{booking.title or booking.service.title}' as done. "
+                     "Please confirm to release payment. Auto-confirms in 48 hours.")
         )
-        send_push_to_user(booking.customer, "Job Completed", f"Your booking '{booking.title or booking.service.title}' is complete. Leave a review!", {"bookingId": booking.id})
+        from core.push import send_push_to_user
+        send_push_to_user(booking.customer, "Confirm Job Completion",
+                          f"Please confirm booking #{booking.id} to release payment.",
+                          {"bookingId": booking.id})
 
-        return Response({"message": "Booking marked as completed", "status": booking.status})
+        return Response({"message": "Job marked as done. Awaiting customer confirmation.",
+                         "status": booking.status})
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
