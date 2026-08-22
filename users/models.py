@@ -48,6 +48,22 @@ class ProviderProfile(models.Model):
     years_of_experience = models.PositiveIntegerField(default=0)
     is_available = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
+
+    # KYC / identity verification
+    class VerificationStatus(models.TextChoices):
+        UNVERIFIED = "UNVERIFIED", "Unverified"
+        PENDING = "PENDING", "Pending Review"
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
+
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.UNVERIFIED,
+    )
+    id_document_type = models.CharField(max_length=50, blank=True, null=True)  # e.g. NIN, Driver's License, Passport
+    id_document = models.FileField(upload_to='verification/', blank=True, null=True)
+    verification_note = models.TextField(blank=True, null=True)  # admin feedback on rejection
     
     city = models.CharField(max_length=100, default='Lagos')
     address = models.TextField(blank=True, null=True)
@@ -61,6 +77,21 @@ class ProviderProfile(models.Model):
 
     def __str__(self):
         return f"Provider: {self.user.username}"
+
+
+class PushToken(models.Model):
+    """Expo push token registered by a user's device for push notifications."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_tokens')
+    token = models.CharField(max_length=255, unique=True)
+    platform = models.CharField(max_length=20, blank=True, null=True)  # ios / android / web
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Push Token"
+        verbose_name_plural = "Push Tokens"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.token[:25]}..."
     
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

@@ -6,6 +6,7 @@ from django.db.models import Q
 from .models import Booking, ChatRoom, Message
 from .serializers import BookingSerializer, ChatRoomSerializer, MessageSerializer
 from users.models import Notification
+from core.push import send_push_to_user
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -34,6 +35,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             title="New Booking Request",
             message=f"{self.request.user.username} requested your service: {booking.title or booking.service.title}"
         )
+        send_push_to_user(booking.provider.user, "New Booking Request", f"{self.request.user.username} requested your service: {booking.title or booking.service.title}", {"bookingId": booking.id})
 
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
@@ -50,6 +52,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             title="Booking Accepted",
             message=f"Your booking for '{booking.title or booking.service.title}' has been accepted."
         )
+        send_push_to_user(booking.customer, "Booking Accepted", f"Your booking '{booking.title or booking.service.title}' has been accepted.", {"bookingId": booking.id})
 
         return Response({"message": "Booking accepted", "status": booking.status})
 
@@ -68,6 +71,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             title="Booking Declined",
             message=f"Your booking for '{booking.title or booking.service.title}' was declined."
         )
+        send_push_to_user(booking.customer, "Booking Declined", f"Your booking '{booking.title or booking.service.title}' was declined.", {"bookingId": booking.id})
 
         return Response({"message": "Booking rejected", "status": booking.status})
 
@@ -76,7 +80,7 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = self.get_object()
         if request.user.role != 'PROVIDER' or booking.provider.user != request.user:
             return Response({"error": "Not allowed"}, status=status.HTTP_403_FORBIDDEN)
-        
+
         booking.status = Booking.Status.COMPLETED
         booking.completed_at = timezone.now()
         booking.save()
@@ -92,8 +96,69 @@ class BookingViewSet(viewsets.ModelViewSet):
             title="Job Completed",
             message=f"Your booking for '{booking.title or booking.service.title}' has been marked as completed."
         )
+        send_push_to_user(booking.customer, "Job Completed", f"Your booking '{booking.title or booking.service.title}' is complete. Leave a review!", {"bookingId": booking.id})
 
         return Response({"message": "Booking marked as completed", "status": booking.status})
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        """Customer cancels their own booking (only while PENDING or ACCEPTED)."""
+        booking = self.get_object()
+        if booking.customer != request.user:
+            return Response({"error": "Only the customer can cancel this booking."}, status=status.HTTP_403_FORBIDDEN)
+
+        if booking.status not in [Booking.Status.PENDING, Booking.Status.ACCEPTED]:
+            return Response(
+                {"error": f"Cannot cancel a booking that is {booking.status.lower()}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reason = request.data.get("reason", "")
+        booking.status = Booking.Status.CANCELLED
+        booking.customer_note = reason or booking.customer_note
+        booking.save()
+
+        # Notify the provider
+        Notification.objects.create(
+            user=booking.provider.user,
+            title="Booking Cancelled",
+            message=f"{request.user.username} cancelled the booking "
+                    f"'{booking.title or (booking.service.title if booking.service else '')}'."
+                    + (f" Reason: {reason}" if reason else "")
+        )
+        send_push_to_user(booking.provider.user, "Booking Cancelled", f"{request.user.username} cancelled booking #{booking.id}.", {"bookingId": booking.id})
+
+        return Response({"message": "Booking cancelled", "status": booking.status})
+
+    @action(detail=True, methods=['post'])
+    def dispute(self, request, pk=None):
+        """Either party can flag an active/completed booking as disputed."""
+        booking = self.get_object()
+        is_customer = booking.customer == request.user
+        is_provider = request.user.role == 'PROVIDER' and booking.provider.user == request.user
+        if not (is_customer or is_provider):
+            return Response({"error": "Not allowed"}, status=status.HTTP_403_FORBIDDEN)
+
+        if booking.status == Booking.Status.DISPUTED:
+            return Response({"error": "Booking is already disputed."}, status=status.HTTP_400_BAD_REQUEST)
+        if booking.status == Booking.Status.CANCELLED:
+            return Response({"error": "Cannot dispute a cancelled booking."}, status=status.HTTP_400_BAD_REQUEST)
+
+        reason = request.data.get("reason", "")
+        booking.status = Booking.Status.DISPUTED
+        booking.save()
+
+        # Notify the other party
+        other_user = booking.provider.user if is_customer else booking.customer
+        Notification.objects.create(
+            user=other_user,
+            title="Booking Disputed",
+            message=f"A dispute was opened on booking #{booking.id}"
+                    + (f". Reason: {reason}" if reason else ".")
+        )
+        send_push_to_user(other_user, "Booking Disputed", f"A dispute was opened on booking #{booking.id}.", {"bookingId": booking.id})
+
+        return Response({"message": "Dispute opened. Our team will review it.", "status": booking.status})
 
 
 class ChatRoomViewSet(viewsets.ModelViewSet):

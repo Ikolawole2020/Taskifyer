@@ -38,7 +38,7 @@ class SimpleServiceSerializer(serializers.ModelSerializer):
         from services.models import Service
         model = Service
         fields = [
-            'id', 'title', 'description', 'price',
+            'id', 'title', 'description', 'price', 'image',
             'duration_hours', 'category_name', 'is_active'
         ]
 
@@ -59,9 +59,11 @@ class ProviderProfileSerializer(serializers.ModelSerializer):
         model = ProviderProfile
         fields = [
             'id', 'user', 'bio', 'years_of_experience', 'is_available',
-            'is_verified', 'city', 'address', 'average_rating',
+            'is_verified', 'verification_status', 'verification_note',
+            'city', 'address', 'average_rating',
             'total_reviews', 'total_jobs_completed', 'created_at', 'services', 'portfolio_images'
         ]
+        read_only_fields = ['verification_status', 'verification_note']
 
     def get_services(self, obj):
         services = obj.services.filter(is_active=True)

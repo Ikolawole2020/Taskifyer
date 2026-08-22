@@ -12,6 +12,8 @@ from .views import (
     CustomTokenObtainPairView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    VerificationRequestView,
+    DeviceTokenView,
 )
 
 router = DefaultRouter()
@@ -29,4 +31,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('password-reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
     path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    path('verify-request/', VerificationRequestView.as_view(), name='verification-request'),
+    path('devices/', DeviceTokenView.as_view(), name='device-tokens'),
 ]

@@ -38,6 +38,47 @@ class ServiceViewSet(viewsets.ModelViewSet):
                 Q(category__name__icontains=search)
             )
 
+        # Category filter (by slug or id)
+        category = self.request.query_params.get('category')
+        if category:
+            if category.isdigit():
+                queryset = queryset.filter(category_id=category)
+            else:
+                queryset = queryset.filter(category__slug=category)
+
+        # City filter (matches provider's operating city)
+        city = self.request.query_params.get('city')
+        if city:
+            queryset = queryset.filter(provider__city__iexact=city)
+
+        # Price range filter
+        min_price = self.request.query_params.get('min_price')
+        if min_price:
+            try:
+                queryset = queryset.filter(price__gte=min_price)
+            except (ValueError, TypeError):
+                pass
+        max_price = self.request.query_params.get('max_price')
+        if max_price:
+            try:
+                queryset = queryset.filter(price__lte=max_price)
+            except (ValueError, TypeError):
+                pass
+
+        # Only show services from verified providers to the public (trust)
+        # NOTE: kept permissive for now — uncomment when enough providers are verified.
+        # queryset = queryset.filter(provider__is_verified=True)
+
+        # Sorting: price, rating, newest (default)
+        ordering = self.request.query_params.get('ordering')
+        allowed_orderings = {
+            'price': ['price'],
+            '-price': ['-price'],
+            'rating': ['-provider__average_rating'],
+            'newest': ['-created_at'],
+        }
+        queryset = queryset.order_by(*allowed_orderings.get(ordering, ['-created_at']))
+
         return queryset
 
     def get_object(self):
