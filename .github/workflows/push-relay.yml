@@ -1,0 +1,76 @@
+name: Push Relay
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes
+  workflow_dispatch: {}      # manual run button
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch queued pushes
+        shell: python
+        env:
+          QUEUE_TOKEN: ${{ secrets.PUSH_QUEUE_TOKEN }}
+          API_BASE: https://taskify.pythonanywhere.com/api/push-queue
+        run: |
+          import json, os, urllib.request, urllib.error
+
+          headers = {'X-Queue-Token': os.environ['QUEUE_TOKEN']}
+          base = os.environ['API_BASE']
+
+          def post(url, payload):
+              req = urllib.request.Request(
+                  url, data=json.dumps(payload).encode(),
+                  headers={'Content-Type': 'application/json', **headers},
+                  method='POST',
+              )
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  return json.loads(r.read().decode())
+
+          # 1. Fetch and claim queued pushes
+          req = urllib.request.Request(f'{base}/outbound/', headers=headers)
+          with urllib.request.urlopen(req, timeout=30) as r:
+              batch = json.loads(r.read().decode())
+
+          pushes = batch.get('pushes', [])
+          print(f'Fetched {len(pushes)} queued push(es)')
+          if not pushes:
+              raise SystemExit(0)
+
+          sent_ids, failed_ids = [], []
+          for p in pushes:
+              try:
+                  body = {
+                      'to': p['to'], 'title': p['title'],
+                      'body': p['body'], 'data': p.get('data') or {},
+                      'sound': 'default',
+                  }
+                  req = urllib.request.Request(
+                      'https://exp.host/--/api/v2/push/send',
+                      data=json.dumps(body).encode(),
+                      headers={'Content-Type': 'application/json'},
+                      method='POST',
+                  )
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      result = json.loads(r.read().decode())
+                  if result.get('data', {}).get('status') == 'ok':
+                      print(f"OK   #{p['id']}")
+                      sent_ids.append(p['id'])
+                  else:
+                      print(f"WARN #{p['id']}: {result.get('data')}")
+                      failed_ids.append(p['id'])
+              except Exception as e:
+                  print(f"FAIL #{p['id']}: {e}")
+                  failed_ids.append(p['id'])
+
+          # 2. Report failures back so they can be retried
+          if failed_ids:
+              try:
+                  post(f'{base}/report-failures/', {'failed_ids': failed_ids})
+              except Exception as e:
+                  print(f'Failure report error: {e}')
+
+          if failed_ids:
+              raise SystemExit(f'{len(failed_ids)} push(es) failed; will be retried.')

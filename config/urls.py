@@ -17,6 +17,7 @@ urlpatterns = [
     path('api/', include('bookings.urls')),
     path('api/', include('reviews.urls')),
     path('api/payments/', include('payments.urls')),
+    path('api/push-queue/', include('core.urls')),
 ]
 
 if settings.DEBUG:

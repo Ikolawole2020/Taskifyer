@@ -151,3 +151,7 @@ EMAIL_FRONTEND_FALLBACK = True
 # Paystack Configuration (NEVER commit real keys — set env vars on PythonAnywhere)
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', 'sk_test_d03179807b843af941ff7016ad35a480764afe0a')
 SITE_URL = os.environ.get('SITE_URL', 'https://taskify.pythonanywhere.com')
+
+# Shared secret for the external push relay (GitHub Actions) polling the queue.
+# Set the same value as a repo secret named PUSH_QUEUE_TOKEN on GitHub.
+PUSH_QUEUE_TOKEN = os.environ.get('PUSH_QUEUE_TOKEN', 'bkf-push-queue-2026-secure-token')
