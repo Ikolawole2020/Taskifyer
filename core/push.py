@@ -16,7 +16,7 @@ def send_push_to_user(user, title, body, data=None):
     Never raises — push failures must not break API requests.
     Returns number of pushes attempted.
     """
-    from .models import PushToken
+    from users.models import PushToken
 
     tokens = list(PushToken.objects.filter(user=user).values_list('token', flat=True))
     if not tokens:
