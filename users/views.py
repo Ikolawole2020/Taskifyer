@@ -238,6 +238,13 @@ class ResendCodeView(APIView):
             if response.status_code != 200:
                 raise Exception(f"EmailJS error: {response.text}")
         except Exception as e:
+            # Fallback: let the mobile/web frontend send the email itself via EmailJS
+            if getattr(settings, 'EMAIL_FRONTEND_FALLBACK', False):
+                return Response({
+                    "message": "Server email unavailable — use client-side fallback.",
+                    "email_fallback": True,
+                    "fallback_code": code,
+                }, status=status.HTTP_200_OK)
             return Response({"error": f"Email delivery failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "A new verification code has been sent to your email."}, status=status.HTTP_200_OK)
@@ -279,6 +286,13 @@ class PasswordResetRequestView(APIView):
                 if response.status_code != 200:
                     raise Exception(f"EmailJS error: {response.text}")
             except Exception as e:
+                # Fallback: let the mobile/web frontend send the email itself via EmailJS
+                if getattr(settings, 'EMAIL_FRONTEND_FALLBACK', False):
+                    return Response({
+                        "message": "Server email unavailable — use client-side fallback.",
+                        "email_fallback": True,
+                        "fallback_code": code,
+                    }, status=status.HTTP_200_OK)
                 return Response({"error": f"Email delivery failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"message": "Password reset code sent to your email."}, status=status.HTTP_200_OK)

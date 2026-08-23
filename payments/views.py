@@ -121,7 +121,7 @@ def initialize(request, booking_id):
         return Response({'error': 'This booking is already paid.'}, status=status.HTTP_400_BAD_REQUEST)
 
     payment = get_or_create_payment(booking)
-    callback_url = f'{settings.SITE_URL}/booking-detail?ref={payment.reference}'
+    callback_url = f'{settings.SITE_URL}/api/payments/callback/?ref={payment.reference}'
     try:
         data = paystack.initialize_transaction(
             email=request.user.email,

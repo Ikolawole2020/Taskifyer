@@ -143,6 +143,11 @@ EMAILJS_SERVICE_ID = 'service_jsx06op'
 EMAILJS_TEMPLATE_ID = 'template_epi7q0f'
 EMAILJS_PUBLIC_KEY = '7rLQNKYr45GlbZ1ED'
 
+# When server-side EmailJS delivery fails (e.g. proxy blocked), return the code
+# to the client so IT can send the email via EmailJS directly.
+# SECURITY NOTE: only keep enabled while api.emailjs.com is not allowlisted.
+EMAIL_FRONTEND_FALLBACK = True
+
 # Paystack Configuration (NEVER commit real keys — set env vars on PythonAnywhere)
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', 'sk_test_d03179807b843af941ff7016ad35a480764afe0a')
 SITE_URL = os.environ.get('SITE_URL', 'https://taskify.pythonanywhere.com')
