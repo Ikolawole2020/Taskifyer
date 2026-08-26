@@ -66,7 +66,7 @@ export default function EditServicePage() {
         });
 
         if (service.image) {
-          setPreview(service.image);
+          setPreview(getMediaUrl(service.image));
         }
       } catch (error) {
         console.error('Failed to load service:', error);

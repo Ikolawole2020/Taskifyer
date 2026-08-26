@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import API from '@/lib/api';
+import API, { getMediaUrl } from '@/lib/api';
 
 export default function PortfolioGallery({ providerId, images = [], isOwner = false, onImageAdded }) {
   const [portfolioList, setPortfolioList] = useState(images);
@@ -85,7 +85,7 @@ export default function PortfolioGallery({ providerId, images = [], isOwner = fa
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {portfolioList.map((item) => (
             <div key={item.id} className="relative group bg-slate-900 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
-              <img src={item.image} alt={item.caption || 'Portfolio work'} className="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
+              <img src={getMediaUrl(item.image)} alt={item.caption || 'Portfolio work'} className="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
               {item.caption && (
                 <div className="p-3 bg-slate-950/90 text-xs text-slate-300 border-t border-white/5">
                   {item.caption}

@@ -174,7 +174,7 @@ export default function ServiceDetailPage() {
               {service.image && (
                 <div className="rounded-2xl overflow-hidden border border-white/10 -mx-2 sm:mx-0">
                   <img
-                    src={service.image}
+                    src={getMediaUrl(service.image)}
                     alt={service.title}
                     className="w-full h-56 sm:h-72 object-cover"
                   />

@@ -8,6 +8,22 @@ const API = axios.create({
   },
 });
 
+// Backend origin for media files (profile pictures, portfolio, etc.)
+export const MEDIA_BASE = (
+  process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api'
+).replace(/\/api\/?$/, '');
+
+/**
+ * Resolve a possibly-relative media path from the API into an absolute URL.
+ * e.g. '/media/profiles/x.jpg' → 'https://taskify.pythonanywhere.com/media/profiles/x.jpg'
+ */
+export function getMediaUrl(path) {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  return MEDIA_BASE + String(path).replace(/^(?!\/)/, '/');
+}
+
+
 // Automatically add token to every request if it exists
 API.interceptors.request.use((config) => {
   const token = Cookies.get('access_token');

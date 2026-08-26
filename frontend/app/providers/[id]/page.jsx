@@ -220,7 +220,7 @@ export default function ProviderProfilePage() {
                 >
                   {service.image ? (
                     <img
-                      src={service.image}
+                      src={getMediaUrl(service.image)}
                       alt={service.title}
                       className="w-full h-40 object-cover"
                     />

@@ -296,7 +296,7 @@ export default function MyServicesPage() {
                   <div className="shrink-0">
                     {service.image ? (
                       <img
-                        src={service.image}
+                        src={getMediaUrl(service.image)}
                         alt={service.title}
                         className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-white/10"
                       />

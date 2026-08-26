@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import API from '@/lib/api';
+import API, { getMediaUrl } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { getCurrentUser } from '@/lib/auth';
 import PortfolioGallery from '@/components/PortfolioGallery';
@@ -201,7 +201,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-5 mb-8">
             {preview || user?.profile_picture ? (
               <img
-                src={preview || user.profile_picture}
+                src={preview || getMediaUrl(user.profile_picture)}
                 alt="Profile"
                 className="w-16 h-16 rounded-2xl object-cover border border-white/10"
               />

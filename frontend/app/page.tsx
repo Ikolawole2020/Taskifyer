@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import API from '@/lib/api';
+import API, { getMediaUrl } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 
 const categoryIcons: Record<string, string> = {
@@ -228,7 +228,7 @@ function HomePageContent() {
                   <div className="relative overflow-hidden h-44 bg-slate-800">
                     {service.image ? (
                       <img
-                        src={service.image}
+                        src={getMediaUrl(service.image)}
                         alt={service.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                       />
