@@ -60,7 +60,7 @@ export default function LoginPage() {
             href="/"
             className="inline-block text-3xl font-extrabold tracking-tight text-white hover:opacity-90 transition focus:outline-none"
           >
-            Skill<span className="text-blue-400">Link</span>
+            Book<span className="text-orange-500">N</span>fix
           </Link>
           <h1 className="text-xl font-bold text-white mt-4">Welcome back</h1>
           <p className="text-sm text-slate-400 mt-1">
