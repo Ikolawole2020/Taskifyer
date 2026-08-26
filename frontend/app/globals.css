@@ -108,3 +108,38 @@ html.light .bg-blue-600\/10 {
   background-color: rgba(234, 88, 12, 0.08) !important;
 }
 
+/* Navbar scrolled state → frosted white */
+html.light .bg-\[\#0b1120\]\/80 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 1px 0 rgba(234, 88, 12, 0.12) !important;
+}
+
+/* Chat & remaining slate surfaces */
+html.light .bg-slate-800,
+html.light .border-slate-800 {
+  background-color: #f9efe6 !important;
+  border-color: rgba(234, 88, 12, 0.18) !important;
+}
+html.light .border-slate-700 {
+  border-color: rgba(234, 88, 12, 0.25) !important;
+}
+html.light .border-slate-900 {
+  border-color: rgba(234, 88, 12, 0.15) !important;
+}
+/* Message input text stays readable */
+html.light input.text-white,
+html.light textarea.text-white {
+  color: #1a120b !important;
+}
+html.light ::placeholder {
+  color: #a08b7a !important;
+  opacity: 1;
+}
+
+/* Chat send button → brand orange */
+html.light .bg-indigo-600,
+html.light .hover\:bg-indigo-500:hover {
+  background-color: #ea580c !important;
+}
+
+
