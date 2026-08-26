@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import API from '@/lib/api';
+import API, { getMediaUrl } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { getCurrentUser } from '@/lib/auth';
 import PortfolioGallery from '@/components/PortfolioGallery';
