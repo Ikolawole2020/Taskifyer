@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070b14] text-white">
+      <div className="min-h-screen bg-[#071033] text-white">
         <Navbar />
         <div className="max-w-3xl mx-auto px-4 py-32 text-center text-slate-400">
           Loading profile...
@@ -164,7 +164,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-white">
+    <div className="min-h-screen bg-[#071033] text-white">
       <Navbar />
 
       <div className="max-w-3xl mx-auto px-4 py-28 space-y-8">

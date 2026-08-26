@@ -88,6 +88,18 @@ export default function Navbar() {
             Book<span className="text-orange-500">N</span>fix
           </Link>
 
+          {/* Theme Toggle */}
+          <button
+            onClick={() => {
+              const isLight = document.documentElement.classList.toggle('light');
+              localStorage.setItem('bnf-theme', isLight ? 'light' : 'dark');
+            }}
+            title="Toggle light / dark mode"
+            className="ml-2 w-9 h-9 rounded-lg border border-white/10 hover:border-orange-500/40 flex items-center justify-center text-sm transition"
+          >
+            🌓
+          </button>
+
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-1">
             {loading ? (

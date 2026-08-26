@@ -59,7 +59,7 @@ export default function ProviderProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070b14] text-slate-100 font-sans">
+      <div className="min-h-screen bg-[#071033] text-slate-100 font-sans">
         <Navbar />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-28 pb-20 space-y-8">
           <div className="h-64 bg-slate-900/60 rounded-3xl border border-white/5 animate-pulse" />
@@ -71,7 +71,7 @@ export default function ProviderProfilePage() {
 
   if (!provider) {
     return (
-      <div className="min-h-screen bg-[#070b14] text-slate-100 font-sans">
+      <div className="min-h-screen bg-[#071033] text-slate-100 font-sans">
         <Navbar />
         <main className="max-w-3xl mx-auto px-4 pt-32 text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-white/10 text-slate-400 flex items-center justify-center mx-auto text-2xl font-bold">
@@ -96,7 +96,7 @@ export default function ProviderProfilePage() {
   const isOwner = currentUser && currentUser.id === provider.user?.id;
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#071033] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
       <Navbar />
 
       {/* Ambient Glow */}

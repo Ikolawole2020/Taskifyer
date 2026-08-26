@@ -124,7 +124,7 @@ export default function MyServicesPage() {
   }, [services]);
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#071033] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
       <Navbar />
 
       {/* Toast */}

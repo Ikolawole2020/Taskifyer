@@ -24,3 +24,87 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ============================================================
+   THEME: BookNfix dark (default, deep blue) / light (white+orange)
+   Toggled by adding/removing the `light` class on <html>.
+   ============================================================ */
+
+html.light body {
+  background: #fdf8f3;
+  color: #1a120b;
+}
+
+html.light .bg-\[\#071033\] {
+  background-color: #fdf8f3 !important;
+}
+html.light .bg-\[\#070b14\] {
+  background-color: #fdf8f3 !important;
+}
+
+/* Cards & panels → white */
+html.light .bg-slate-900\/40,
+html.light .bg-slate-900\/50,
+html.light .bg-slate-900\/60,
+html.light .bg-slate-900\/70,
+html.light .bg-slate-900\/80,
+html.light .bg-slate-900\/90,
+html.light .bg-slate-950\/50,
+html.light .bg-slate-950\/60,
+html.light .bg-slate-950\/80,
+html.light .bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+/* Subtle chips on dark → warm tinted on light */
+html.light .bg-slate-950\/40,
+html.light .bg-white\/5,
+html.light .bg-white\/10 {
+  background-color: #f9efe6 !important;
+}
+
+/* Body text hierarchy → warm dark */
+html.light .text-slate-100,
+html.light .text-slate-200 {
+  color: #1a120b !important;
+}
+html.light .text-slate-300 {
+  color: #52422f !important;
+}
+html.light .text-slate-400,
+html.light .text-slate-500 {
+  color: #8a7460 !important;
+}
+
+/* White headings/text sitting directly on light surfaces → dark.
+   Buttons that pair text-white WITH a colored bg are re-whitened below. */
+html.light .text-white {
+  color: #1a120b;
+}
+html.light [class*="bg-emerald"] .text-white,
+html.light [class*="bg-emerald"][class*="text-white"],
+html.light [class*="bg-blue-6"] .text-white,
+html.light [class*="bg-blue-6"][class*="text-white"],
+html.light [class*="bg-orange"] .text-white,
+html.light [class*="bg-orange"][class*="text-white"],
+html.light [class*="bg-rose-6"] .text-white,
+html.light [class*="bg-rose-6"][class*="text-white"] {
+  color: #ffffff !important;
+}
+
+/* Borders → orange-tinted hairlines */
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20 {
+  border-color: rgba(234, 88, 12, 0.18) !important;
+}
+html.light .border-white\/5,
+html.light .border-white\/30 {
+  border-color: rgba(234, 88, 12, 0.1) !important;
+}
+
+/* Dark glow backdrops → soft orange glow */
+html.light .bg-blue-600\/10 {
+  background-color: rgba(234, 88, 12, 0.08) !important;
+}
+

@@ -40,7 +40,7 @@ export default function HelpPage() {
   const [open, setOpen] = useState(null);
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 font-sans">
+    <div className="min-h-screen bg-[#071033] text-slate-100 font-sans">
       <Navbar />
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-28 pb-20">
         <h1 className="text-3xl font-extrabold text-white mb-2">Help Center</h1>

@@ -98,7 +98,7 @@ function HomePageContent() {
       .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 font-sans overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#071033] text-slate-100 font-sans overflow-x-hidden selection:bg-blue-500/30">
       <Navbar />
 
       {/* HERO SECTION */}
@@ -353,7 +353,7 @@ export default function HomePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#070b14] text-white flex items-center justify-center font-bold text-lg">
+        <div className="min-h-screen bg-[#071033] text-white flex items-center justify-center font-bold text-lg">
           Loading BookNfix...
         </div>
       }

@@ -18,12 +18,21 @@ export const metadata: Metadata = {
     "Book verified local artisans for home and business services. Secure payments, escrow protection, and automatic payouts.",
 };
 
+const themeInitScript = `
+try {
+  if (localStorage.getItem('bnf-theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+} catch (e) {}
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

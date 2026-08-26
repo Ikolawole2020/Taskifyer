@@ -61,7 +61,7 @@ export default function ProviderDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070b14] text-white">
+      <div className="min-h-screen bg-[#071033] text-white">
         <Navbar />
         <div className="max-w-6xl mx-auto px-4 pt-32 text-center text-slate-400">
           Loading dashboard...
@@ -71,7 +71,7 @@ export default function ProviderDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100">
+    <div className="min-h-screen bg-[#071033] text-slate-100">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-28 pb-20">
