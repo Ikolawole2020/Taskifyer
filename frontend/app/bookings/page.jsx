@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import API from '@/lib/api';
+import { getApiErrorMessage } from '@/lib/errors';
 import Navbar from '@/components/Navbar';
 import { getCurrentUser } from '@/lib/auth';
 import ChatBox from '@/components/ChatBox';
@@ -18,6 +19,7 @@ export default function BookingsPage() {
   // Action State
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
+  const [paymentStatuses, setPaymentStatuses] = useState({});
 
   // Review State
   const [reviewingId, setReviewingId] = useState(null);
@@ -37,9 +39,21 @@ export default function BookingsPage() {
 
         const res = await API.get('/bookings/');
         setBookings(res.data || []);
+
+        // Fetch payment status for each booking (customer-facing)
+        const list = res.data || [];
+        const entries = await Promise.all(
+          list.map((b) =>
+            API
+              .get(`/payments/status/${b.id}/`)
+              .then((r) => [b.id, r.data.payment_status])
+              .catch(() => [b.id, null])
+          )
+        );
+        setPaymentStatuses(Object.fromEntries(entries));
       } catch (error) {
-        console.error('Failed to fetch bookings:', error);
-        showToast('Error loading bookings. Please refresh.', 'error');
+        console.warn('Failed to fetch bookings:', error?.response?.status);
+        showToast(getApiErrorMessage(error, 'Error loading bookings. Please refresh.'), 'error');
       } finally {
         setLoading(false);
       }
@@ -56,15 +70,52 @@ export default function BookingsPage() {
   const handleAction = async (bookingId, action) => {
     setActionLoadingId(bookingId);
     try {
-      await API.post(`/bookings/${bookingId}/${action}/`);
+      // Completion confirmation lives under the payments app
+      const endpoint =
+        action === 'confirm-completion'
+          ? `/payments/confirm-completion/${bookingId}/`
+          : `/bookings/${bookingId}/${action}/`;
+      await API.post(endpoint);
+
+      const successMessages = {
+        accept: 'Booking accepted!',
+        reject: 'Booking declined.',
+        complete: 'Job marked as done — awaiting customer confirmation.',
+        cancel: 'Booking cancelled successfully.',
+        dispute: 'Dispute opened. Our team will review it.',
+        'confirm-completion': 'Completion confirmed — provider payout released!',
+      };
+
       const res = await API.get('/bookings/');
       setBookings(res.data || []);
-      showToast(`Booking ${action}ed successfully!`, 'success');
+
+      // Refresh payment statuses too
+      const entries = await Promise.all(
+        (res.data || []).map((b) =>
+          API.get(`/payments/status/${b.id}/`)
+            .then((r) => [b.id, r.data.payment_status])
+            .catch(() => [b.id, null])
+        )
+      );
+      setPaymentStatuses(Object.fromEntries(entries));
+
+      showToast(successMessages[action] || 'Done!', 'success');
     } catch (error) {
-      console.error(error);
-      const msg = error.response?.data?.error || `Failed to ${action} booking`;
-      showToast(msg, 'error');
+      showToast(getApiErrorMessage(error, `Failed to ${action.replace('-', ' ')} booking`), 'error');
     } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const startPayment = async (bookingId) => {
+    setActionLoadingId(bookingId);
+    try {
+      const res = await API.post(`/payments/initialize/${bookingId}/`);
+      if (res.data?.authorization_url) {
+        window.location.href = res.data.authorization_url;
+      }
+    } catch (error) {
+      showToast(getApiErrorMessage(error, 'Could not start payment.'), 'error');
       setActionLoadingId(null);
     }
   };
@@ -107,6 +158,19 @@ export default function BookingsPage() {
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
             In Progress
+          </span>
+        );
+      case 'AWAITING_CONFIRMATION':
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse" />
+            Awaiting Confirmation
+          </span>
+        );
+      case 'DISPUTED':
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20 flex items-center gap-1.5">
+            ⚠️ Disputed
           </span>
         );
       case 'COMPLETED':
@@ -286,6 +350,71 @@ export default function BookingsPage() {
                 {booking.chat_room && (
                   <div className="my-4">
                     <ChatBox roomId={booking.chat_room} />
+                  </div>
+                )}
+
+                {/* CUSTOMER ACTIONS: Pay / Confirm / Cancel / Dispute */}
+                {user?.role !== 'PROVIDER' && (
+                  <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-white/5">
+                    {/* Pay Now */}
+                    {paymentStatuses[booking.id] !== 'PAID' &&
+                      !['CANCELLED', 'DISPUTED'].includes(booking.status) && (
+                        <button
+                          onClick={() => startPayment(booking.id)}
+                          disabled={actionLoadingId === booking.id}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+                        >
+                          {actionLoadingId === booking.id
+                            ? 'Opening...'
+                            : `Pay Now — ₦${Number(booking.price || 0).toLocaleString()}`}
+                        </button>
+                      )}
+                    {paymentStatuses[booking.id] === 'PAID' && (
+                      <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg">
+                        ✓ Paid (escrow held)
+                      </span>
+                    )}
+
+                    {/* Confirm Completion */}
+                    {booking.status === 'AWAITING_CONFIRMATION' && (
+                      <button
+                        onClick={() => handleAction(booking.id, 'confirm-completion')}
+                        disabled={actionLoadingId === booking.id}
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-50"
+                      >
+                        Confirm Completion — Release Payment
+                      </button>
+                    )}
+
+                    {/* Cancel */}
+                    {['PENDING', 'ACCEPTED'].includes(booking.status) && (
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              'Are you sure you want to cancel this booking?'
+                            )
+                          ) {
+                            handleAction(booking.id, 'cancel');
+                          }
+                        }}
+                        disabled={actionLoadingId === booking.id}
+                        className="bg-slate-800 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition disabled:opacity-50"
+                      >
+                        Cancel Booking
+                      </button>
+                    )}
+
+                    {/* Dispute */}
+                    {!['CANCELLED', 'DISPUTED'].includes(booking.status) && (
+                      <button
+                        onClick={() => handleAction(booking.id, 'dispute')}
+                        disabled={actionLoadingId === booking.id}
+                        className="text-xs font-semibold text-amber-400 hover:text-amber-300 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl transition disabled:opacity-50"
+                      >
+                        ⚠ Report an Issue
+                      </button>
+                    )}
                   </div>
                 )}
 

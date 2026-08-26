@@ -419,6 +419,52 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Provider Tools: Verification + Payout */}
+        {user?.role === 'PROVIDER' && (
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            {provider && provider.verification_status !== 'APPROVED' && (
+              <a
+                href="/verify-provider"
+                className="bg-slate-900/60 border border-white/10 hover:border-blue-500/40 rounded-2xl p-5 transition group"
+              >
+                <span className="text-xl">🛡️</span>
+                <p className="font-bold text-white text-sm mt-2 group-hover:text-blue-300">
+                  {provider.verification_status === 'PENDING'
+                    ? 'Verification under review…'
+                    : provider.verification_status === 'REJECTED'
+                      ? 'Verification rejected — resubmit'
+                      : 'Get Verified (ID check)'}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">Build customer trust with a verified badge.</p>
+              </a>
+            )}
+            <a
+              href="/payout-setup"
+              className="bg-slate-900/60 border border-white/10 hover:border-emerald-500/40 rounded-2xl p-5 transition group"
+            >
+              <span className="text-xl">🏦</span>
+              <p className="font-bold text-white text-sm mt-2 group-hover:text-emerald-300">
+                {provider?.payout_ready
+                  ? `Payout: ${provider.bank_name || 'Bank'} ••${provider.account_number_last4 || ''}`
+                  : 'Set up payout account'}
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {provider?.payout_ready ? 'Linked ✓' : 'Receive earnings automatically after each job.'}
+              </p>
+            </a>
+          </div>
+        )}
+
+        {/* Support Links */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <a href="/help" className="text-sm text-blue-400 hover:text-blue-300 font-semibold">
+            ❓ Help Center & FAQ
+          </a>
+          <a href="/terms" className="text-sm text-slate-400 hover:text-white font-semibold">
+            📜 Terms & Conditions
+          </a>
+        </div>
+
         {/* Danger Zone: Delete Account */}
         <div className="bg-rose-950/20 border border-rose-500/20 rounded-2xl p-6 sm:p-8 flex items-center justify-between flex-wrap gap-4">
           <div>

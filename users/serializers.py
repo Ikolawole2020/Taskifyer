@@ -60,10 +60,15 @@ class ProviderProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'bio', 'years_of_experience', 'is_available',
             'is_verified', 'verification_status', 'verification_note',
+            'bank_name', 'account_number_last4', 'account_name', 'payout_ready',
             'city', 'address', 'average_rating',
             'total_reviews', 'total_jobs_completed', 'created_at', 'services', 'portfolio_images'
         ]
-        read_only_fields = ['verification_status', 'verification_note']
+        read_only_fields = [
+            'verification_status', 'verification_note',
+            'bank_name', 'bank_code', 'account_number_last4',
+            'account_name', 'recipient_code', 'payout_ready',
+        ]
 
     def get_services(self, obj):
         services = obj.services.filter(is_active=True)

@@ -85,7 +85,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" onClick={closeMenu} className="text-xl font-bold text-white">
-            Skill<span className="text-blue-400">Link</span>
+            Book<span className="text-orange-500">N</span>fix
           </Link>
 
           {/* Desktop Menu */}
