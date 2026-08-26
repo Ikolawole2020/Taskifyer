@@ -84,7 +84,8 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" onClick={closeMenu} className="text-xl font-bold text-white">
+          <Link href="/" onClick={closeMenu} className="flex items-center gap-2 text-xl font-bold text-white">
+            <img src="/logo.png" alt="BookNfix logo" className="w-8 h-8 rounded-lg object-cover" />
             Book<span className="text-orange-500">N</span>fix
           </Link>
 
