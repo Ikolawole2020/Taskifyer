@@ -51,15 +51,38 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({
-                "message": "User registered successfully",
-                "verification_code": user.verification_code,
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "role": user.role
+
+            # Email the verification code via EmailJS (server-side)
+            try:
+                url = "https://api.emailjs.com/api/v1.0/email/send"
+                payload = {
+                    "service_id": getattr(settings, 'EMAILJS_SERVICE_ID', ''),
+                    "template_id": getattr(settings, 'EMAILJS_TEMPLATE_ID', ''),
+                    "user_id": getattr(settings, 'EMAILJS_PUBLIC_KEY', ''),
+                    "template_params": {
+                        "to_email": user.email,
+                        "to_name": user.first_name or user.username,
+                        "code": user.verification_code,
+                    },
                 }
-            }, status=status.HTTP_201_CREATED)
+                response = requests.post(url, json=payload)
+                if response.status_code != 200:
+                    raise Exception(f"EmailJS error: {response.text}")
+
+                return Response({
+                    "message": "User registered successfully",
+                    "user": {"id": user.id, "username": user.username, "role": user.role}
+                }, status=status.HTTP_201_CREATED)
+
+            except Exception:
+                # Fallback: return the code so the client can email it itself
+                return Response({
+                    "message": "User registered — use client-side email fallback.",
+                    "email_fallback": True,
+                    "verification_code": user.verification_code,
+                    "fallback_code": user.verification_code,
+                    "user": {"id": user.id, "username": user.username, "role": user.role}
+                }, status=status.HTTP_201_CREATED)
         
         # This will print the exact validation error to your terminal
         print("VALIDATION ERROR DETAILS:", serializer.errors)
