@@ -93,8 +93,8 @@ export default function PayoutSetupPage() {
           className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-sm text-white mb-5 focus:outline-none focus:border-blue-500"
         >
           <option value="">{banks.length ? 'Select your bank' : 'Loading banks…'}</option>
-          {banks.map((b) => (
-            <option key={b.code} value={b.code}>
+          {banks.map((b, i) => (
+            <option key={`${b.code}-${b.name}-${i}`} value={b.code}>
               {b.name}
             </option>
           ))}
