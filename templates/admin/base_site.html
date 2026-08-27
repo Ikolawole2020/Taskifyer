@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ title }} | {{ site_title|default:_("BookNfix Admin") }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}" class="brand--wrap">
+    <span class="brand--mark">B</span>
+    <span class="brand--text">BookNfix <small>Admin</small></span>
+  </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div class="bn-nav">
+  <a href="{% url 'admin:index' %}">Dashboard</a>
+  <a href="{% url 'admin:users_user_changelist' %}">Users</a>
+  <a href="{% url 'admin:users_providerprofile_changelist' %}">Providers</a>
+  <a href="{% url 'admin:bookings_booking_changelist' %}">Bookings</a>
+  <a href="{% url 'admin:payments_payment_changelist' %}">Payments</a>
+  <a href="{% url 'admin:payments_payout_changelist' %}">Payouts</a>
+  <a href="{% url 'admin:services_service_changelist' %}">Services</a>
+  <a href="{% url 'admin:reviews_review_changelist' %}">Reviews</a>
+  <a href="{% url 'admin:core_queuedpush_changelist' %}">Push Queue</a>
+  <a class="bn-nav--site" href="https://taskify.pythonanywhere.com/" target="_blank" rel="noopener">↗ Open App</a>
+</div>
+{% endblock %}

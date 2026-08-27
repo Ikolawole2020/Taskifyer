@@ -1,0 +1,114 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+  {% if request.user.is_superuser or perms.users.can_view_dashboard %}
+  <div class="bn-dashboard">
+    <div class="bn-hero">
+      <div>
+        <h1>Good day, {{ request.user.first_name|default:request.user.username }} 👋</h1>
+        <p class="muted">Here's what's happening across BookNfix today.</p>
+      </div>
+      <a class="bn-hero--btn" href="{% url 'admin:payments_payout_changelist' %}?status__exact=PENDING_RELEASE">
+        View pending payouts
+      </a>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="bn-kpis">
+      {% for k in kpis %}
+      <div class="bn-kpi bn-kpi--{{ k.accent }}">
+        <div class="bn-kpi--label">{{ k.label }}</div>
+        <div class="bn-kpi--value">{{ k.value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="bn-split">
+      <!-- Recent bookings -->
+      <div class="bn-panel">
+        <div class="bn-panel--head">
+          <span>🕐 Recent bookings</span>
+          <a href="{% url 'admin:bookings_booking_changelist' %}">View all →</a>
+        </div>
+        <table class="bn-table">
+          <thead><tr><th>#</th><th>Service</th><th>Customer</th><th>Provider</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for b in recent_bookings %}
+            <tr>
+              <td><a href="{% url 'admin:bookings_booking_change' b.pk %}">{{ b.id }}</a></td>
+              <td>{{ b.title|truncatechars:22 }}</td>
+              <td>{{ b.customer.username }}</td>
+              <td>{{ b.provider.user.username }}</td>
+              <td>₦{{ b.price }}</td>
+              <td><span class="badge badge-{{ b.status|lower }}">{{ b.get_status_display }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="bn-empty">No bookings yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pending verifications -->
+      <div class="bn-panel">
+        <div class="bn-panel--head">
+          <span>🪪 Provider verifications</span>
+          <a href="{% url 'admin:users_providerprofile_changelist' %}">Review all →</a>
+        </div>
+        <table class="bn-table">
+          <thead><tr><th>Provider</th><th>Doc type</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for p in pending_verifications_list %}
+            <tr>
+              <td>{{ p.user.username }}</td>
+              <td>{{ p.id_document_type|default:"—" }}</td>
+              <td><span class="badge badge-{{ p.verification_status }}">{{ p.get_verification_status_display }}</span></td>
+              <td><a class="bn-link" href="{% url 'admin:users_providerprofile_change' p.pk %}">Review</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="bn-empty">No pending verifications.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Default app index (all registered models) -->
+  {% if app_list %}
+    {% for app in app_list %}
+      <div class="app-{{ app.app_label }} module">
+        <table class="bn-modules">
+          <caption><a href="{{ app.app_url }}" class="section" title="{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}">{{ app.name }}</a></caption>
+          {% for model in app.models %}
+          <tr>
+            <th scope="row"><a href="{{ model.admin_url }}"{% if model.add_url %} class="addlink" title="{% translate 'Add' %}"{% endif %}>{{ model.name }}</a></th>
+            {% if model.add_url %}
+            <td><a href="{{ model.add_url }}" class="addlink">{% translate 'Add' %}</a></td>
+            {% else %}
+            <td>&nbsp;</td>
+            {% endif %}
+            {% if model.admin_url and show_changelinks %}
+            <td><a href="{{ model.admin_url }}" class="changelink">{% translate 'View' %}</a></td>
+            {% else %}
+            <td>&nbsp;</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>{% translate "You don't have permission to view or edit anything." %}</p>
+  {% endif %}
+</div>
+{% endblock %}
