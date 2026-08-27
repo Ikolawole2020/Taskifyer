@@ -205,7 +205,13 @@ class VerifyEmailView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user = get_object_or_404(User, email=email)
+        # Use .filter().first() so duplicate/legacy accounts never crash this view
+        user = User.objects.filter(email=email).order_by('id').first()
+        if not user:
+            return Response(
+                {"error": "No user found with this email address."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         if user.is_verified:
                         return Response({"message": "Email is already verified."}, status=status.HTTP_200_OK)
@@ -232,8 +238,10 @@ class ResendCodeView(APIView):
             return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            user = User.objects.filter(email=email).order_by('id').first()
+        except Exception:
+            user = None
+        if not user:
             return Response({"error": "No user found with this email address."}, status=status.HTTP_404_NOT_FOUND)
 
         if user.is_verified:
@@ -285,8 +293,13 @@ class PasswordResetRequestView(APIView):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            user = User.objects.get(email=email)
-            
+            user = User.objects.filter(email=email).order_by('id').first()
+            if not user:
+                return Response(
+                    {"error": "No user found with this email address."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
             # Generate a 6-digit reset code
             code = str(random.randint(100000, 999999))
             user.reset_code = code
@@ -333,8 +346,10 @@ class PasswordResetConfirmView(APIView):
             new_password = serializer.validated_data['new_password']
 
             try:
-                user = User.objects.get(email=email)
-            except User.DoesNotExist:
+                user = User.objects.filter(email=email).order_by('id').first()
+            except Exception:
+                user = None
+            if not user:
                 return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
             if user.reset_code != code:

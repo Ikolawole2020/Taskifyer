@@ -93,6 +93,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         if username and User.objects.filter(username=username, is_verified=False).exists():
             User.objects.filter(username=username, is_verified=False).delete()
 
+        # Reject registering with an email that already owns a VERIFIED account
+        if email and User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                {"email": "An account with this email address already exists."}
+            )
+        if username and User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                {"username": "This username is already taken."}
+            )
+
         return attrs
 
     def create(self, validated_data):

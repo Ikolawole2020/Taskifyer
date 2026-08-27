@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import API, { getMediaUrl } from '@/lib/api';
+import { getApiErrorMessage } from '@/lib/errors';
 import Navbar from '@/components/Navbar';
 import Cookies from 'js-cookie';
 
@@ -75,9 +76,24 @@ export default function ServiceDetailPage() {
       showToast('Booking created successfully!', 'success');
       setTimeout(() => router.push('/bookings'), 1200);
     } catch (error) {
-      console.error('Booking error:', error);
-      const detail =
-        error.response?.data?.detail || 'Failed to create booking. Please try again.';
+      const data = error.response?.data;
+      let detail =
+        data?.detail ||
+        data?.error ||
+        // DRF field errors come as {field: ["msg"]} — pull the first one out
+        (() => {
+          if (!data || typeof data !== 'object') return null;
+          for (const [key, val] of Object.entries(data)) {
+            if (Array.isArray(val)) return `${key.replace(/_/g, ' ')}: ${val[0]}`;
+            if (typeof val === 'string') return `${key.replace(/_/g, ' ')}: ${val}`;
+          }
+          return null;
+        })() ||
+        getApiErrorMessage(error, 'Failed to create booking. Please try again.');
+      // Nudge users when the provider isn't bookable
+      if (/provider.*verified|valid pk/i.test(detail)) {
+        detail = 'This provider is not currently accepting bookings (verification or availability pending).';
+      }
       showToast(detail, 'error');
     } finally {
       setBookingLoading(false);

@@ -100,11 +100,7 @@ export default function ProfilePage() {
         data.append('profile_picture', formData.profile_picture);
       }
 
-      const userRes = await API.patch('/me/', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const userRes = await API.patch('/me/', data);
 
       setUser(userRes.data);
 

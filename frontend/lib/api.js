@@ -30,6 +30,14 @@ API.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // For file uploads (FormData), drop the JSON content-type so the
+  // browser sets the correct multipart boundary — otherwise the backend
+  // can't parse the file and it silently fails to save.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+    delete config.headers['Content-type'];
+    delete config.headers['content-type'];
+  }
   return config;
 });
 
