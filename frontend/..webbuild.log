@@ -1,0 +1,46 @@
+▲ Next.js 16.3.0 (Turbopack)
+- Environments: .env.local
+⚠ `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+⚠ Invalid next.config.ts options detected: 
+⚠     Unrecognized key(s) in object: 'eslint'
+⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+✓ Running next.config.ts took 633ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 14.8s
+  Skipping validation of types
+  Finished TypeScript config validation in 116ms ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/19) ...
+  Generating static pages using 7 workers (4/19) 
+  Generating static pages using 7 workers (9/19) 
+  Generating static pages using 7 workers (14/19) 
+✓ Generating static pages using 7 workers (19/19) in 823ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /bookings
+├ ○ /forgot-password
+├ ○ /help
+├ ○ /login
+├ ○ /notifications
+├ ○ /payout-setup
+├ ○ /profile
+├ ƒ /providers/[id]
+├ ○ /providers/dashboard
+├ ○ /providers/services
+├ ƒ /providers/services/edit/[id]
+├ ○ /providers/services/new
+├ ○ /register
+├ ○ /reset-password
+├ ƒ /services/[id]
+├ ○ /terms
+├ ○ /verify-email
+└ ○ /verify-provider
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
