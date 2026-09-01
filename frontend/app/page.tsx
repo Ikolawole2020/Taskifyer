@@ -241,6 +241,16 @@ function HomePageContent() {
                       <span>{getCategoryIcon(service.category?.name)}</span>
                       {service.category?.name || 'General'}
                     </div>
+                    {/* Verification status pill — so users know before booking */}
+                    {service.provider && service.provider.is_verified === false ? (
+                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-amber-500/90 text-[10px] font-bold text-slate-900 shadow-lg">
+                        ⏳ Not Verified
+                      </div>
+                    ) : service.provider && service.provider.is_verified ? (
+                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-500/90 text-[10px] font-bold text-white shadow-lg">
+                        ✓ Verified
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="p-5 space-y-3">
@@ -321,6 +331,11 @@ function HomePageContent() {
                     <h3 className="font-bold text-white group-hover:text-blue-300 transition truncate text-base">
                       {provider.user?.username || 'Provider'}
                     </h3>
+                    {provider.is_verified === false && (
+                      <span className="text-[10px] font-bold text-amber-400">
+                        (Not Verified)
+                      </span>
+                    )}
                     <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
                       <span>📍</span> {provider.city || 'Lagos'}
                     </p>

@@ -90,9 +90,9 @@ export default function ServiceDetailPage() {
           return null;
         })() ||
         getApiErrorMessage(error, 'Failed to create booking. Please try again.');
-      // Nudge users when the provider isn't bookable
-      if (/provider.*verified|valid pk/i.test(detail)) {
-        detail = 'This provider is not currently accepting bookings (verification or availability pending).';
+      // Nudge users when the provider isn't bookable — always surface a clear message
+      if (/provider.*not verified|provider.*verified|valid pk/i.test(detail)) {
+        detail = 'This provider is not verified yet. Please try another provider.';
       }
       showToast(detail, 'error');
     } finally {
