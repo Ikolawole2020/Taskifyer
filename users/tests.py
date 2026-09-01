@@ -96,6 +96,39 @@ class ServiceAndBookingFlowTests(TestCase):
         res = self.client.get("/api/bookings/")
         self.assertEqual(res.status_code, 401)
 
+    def test_booking_unverified_provider_gives_clear_error(self):
+        provider_user = self._make_user("prov2", "PROVIDER")
+        customer = self._make_user("cust7", "CUSTOMER")
+
+        from users.models import ProviderProfile
+        # unverified provider (default)
+        profile = ProviderProfile.objects.create(user=provider_user, bio="hi", city="Lagos")
+        profile.save()
+
+        from services.models import Service, Category
+        cat = Category.objects.create(name="Plumbing", slug="plumbing")
+        service = Service.objects.create(
+            provider=profile, title="Fix sink", description="plumbing",
+            price="5000", category=cat, is_active=True,
+        )
+
+        self._login(customer)
+        res = self.client.post("/api/bookings/", {
+            "provider_id": profile.id,
+            "service_id": service.id,
+            "title": service.title,
+            "description": "please fix it",
+            "price": service.price,
+            "scheduled_date": "2026-09-01",
+            "scheduled_time": "10:00:00",
+            "address": "1 Test Street, Lagos",
+            "city": "Lagos",
+        }, format="json")
+
+        self.assertEqual(res.status_code, 400)
+        msg = str(res.data.get("provider_id", [""])[0]).lower()
+        self.assertIn("not verified", msg)
+
     def test_provider_service_create_and_customer_books(self):
         provider_user = self._make_user("prov1", "PROVIDER")
         customer = self._make_user("cust1", "CUSTOMER")

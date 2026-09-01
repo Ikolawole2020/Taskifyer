@@ -144,6 +144,17 @@ EMAILJS_SERVICE_ID = 'service_jsx06op'
 EMAILJS_TEMPLATE_ID = 'template_epi7q0f'
 EMAILJS_PUBLIC_KEY = '7rLQNKYr45GlbZ1ED'
 
+# Admin notification: when a new PROVIDER signs up, EmailJS template that
+# notifies the admin so they can review/verify the provider. Create this template
+#in of EmailJS dashboard (EmailJS → Email Templates → Create New):
+#   subject e.g. "New provider signup: {{provider_name}}"
+#   body   e.g. "A new provider registered:\nName: {{provider_name}}\nEmail: {{provider_email}}\nPlease log in to the admin panel and verify them."
+# then paste its template_xxx id here.
+EMAILJS_ADMIN_TEMPLATE_ID = 'template_epi7q0f'
+
+# Recipient of the "new provider" admin notification above.
+ADMIN_EMAIL = 'vtech.helpyou@gmail.com'
+
 # When server-side EmailJS delivery fails (e.g. proxy blocked), return the code
 # to the client so IT can send the email via EmailJS directly.
 # SECURITY NOTE: only keep enabled while api.emailjs.com is not allowlisted.

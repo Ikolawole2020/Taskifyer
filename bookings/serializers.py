@@ -12,8 +12,12 @@ class BookingSerializer(serializers.ModelSerializer):
     service = ServiceSerializer(read_only=True)
 
     # Write-only fields for creating a booking
+    # NOTE: query full set here and validate verification/availability manually below,
+    # so unverified/offline providers get a clear, friendly error instead of a raw
+    # "Invalid pk" DRF message.
+
     provider_id = serializers.PrimaryKeyRelatedField(
-        queryset=ProviderProfile.objects.filter(is_verified=True, is_available=True),
+        queryset=ProviderProfile.objects.all(),
         source='provider',
         write_only=True
     )
@@ -24,6 +28,18 @@ class BookingSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+
+    def validate(self, attrs):
+        provider = attrs.get('provider')
+        if provider and not provider.is_verified:
+            raise serializers.ValidationError(
+                {'provider_id': 'This provider is not verified yet. Please try another provider.'}
+            )
+        if provider and not provider.is_available:
+            raise serializers.ValidationError(
+                {'provider_id': 'This provider is currently unavailable. Please try another provider.'}
+            )
+        return attrs
 
     class Meta:
         model = Booking

@@ -51,6 +51,31 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            admin_email = getattr(settings, 'ADMIN_EMAIL', '')
+            admin_tpl = getattr(settings, 'EMAILJS_ADMIN_TEMPLATE_ID', '')
+
+            # If a PROVIDER just signed up, nudge the admin so they can verify them.
+
+            if user.role == 'PROVIDER' and admin_email and admin_tpl:
+                try:
+                    requests.post(
+                        "https://api.emailjs.com/api/v1.0/email/send",
+                        json={
+                            "service_id": getattr(settings, 'EMAILJS_SERVICE_ID', ''),
+                            "template_id": admin_tpl,
+                            "user_id": getattr(settings, 'EMAILJS_PUBLIC_KEY', ''),
+                            "template_params": {
+                                "to_email": admin_email,
+                                "provider_name": user.first_name or user.username,
+                                "provider_email": user.email,
+                                "provider_role": user.role,
+                            },
+                        },
+                        timeout=10,
+                    )
+                except Exception:
+                    # Email delivery must never block registration
+                    pass
 
             # Email the verification code via EmailJS (server-side)
             try:
