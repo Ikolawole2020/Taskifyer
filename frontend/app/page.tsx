@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import API, { getMediaUrl } from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import BootLoader from '@/components/BootLoader';
 
 const categoryIcons: Record<string, string> = {
   electrician: '⚡',
@@ -366,13 +367,7 @@ function HomePageContent() {
 
 export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#071033] text-white flex items-center justify-center font-bold text-lg">
-          Loading BookNfix...
-        </div>
-      }
-    >
+    <Suspense fallback={<BootLoader />}>
       <HomePageContent />
     </Suspense>
   );
